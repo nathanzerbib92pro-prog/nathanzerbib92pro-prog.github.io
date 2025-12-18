@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio // Liquid Experience</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 1. CONFIGURATION & VARIABLES --- */
+        :root {
+            --bg-color: #F5F5F7; /* Gris très clair Apple */
+            --text-main: #1D1D1F;
+            --text-muted: #86868B;
+            --accent-gradient: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%);
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased; /* Rendu texte net sur Mac */
+        }
+
+        /* --- 2. LOADER --- */
+        #loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease-out, visibility 0.5s;
+        }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #0072FF;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- 3. BACKGROUND LIQUIDE (FIXE) --- */
+        .liquid-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; overflow: hidden; pointer-events: none;
+        }
+        .blob {
+            position: absolute; border-radius: 50%;
+            filter: blur(80px); opacity: 0.6;
+            animation: float 10s infinite alternate ease-in-out;
+        }
+        .b1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #E0C3FC; animation-delay: 0s; }
+        .b2 { bottom: -10%; right: -10%; width: 40vw; height: 40vw; background: #8EC5FC; animation-delay: -5s; }
+        .b3 { top: 40%; left: 40%; width: 30vw; height: 30vw; background: #C2E9FB; animation-delay: -2s; opacity: 0.4; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.1); }
+        }
+
+        /* --- 4. NAVIGATION GLASS --- */
+        nav {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 900px;
+            padding: 15px 30px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 1000;
+            transition: 0.3s;
+        }
+        .logo { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; }
+        .nav-links a {
+            text-decoration: none; color: var(--text-main); font-size: 0.9rem; font-weight: 500;
+            margin-left: 25px; transition: color 0.3s;
+        }
+        .nav-links a:hover { color: #0072FF; }
+
+        /* --- 5. COMPOSANTS UI --- */
+        section {
+            padding: 100px 10%;
+            min-height: 100vh;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        
+        h1 { font-size: clamp(3rem, 5vw, 5rem); line-height: 1.1; letter-spacing: -2px; margin-bottom: 20px; }
+        h2 { font-size: 2.5rem; margin-bottom: 40px; letter-spacing: -1px; text-align: center; }
+        p { font-size: 1.1rem; color: var(--text-muted); line-height: 1.6; max-width: 600px; }
+        
+        .gradient-text {
+            background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .btn {
+            display: inline-block; padding: 16px 32px; margin-top: 30px;
+            border-radius: 50px; text-decoration: none; color: white;
+            background: var(--accent-gradient); font-weight: 600;
+            box-shadow: 0 10px 20px rgba(0, 114, 255, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 114, 255, 0.4); }
+
+        /* Classe pour l'animation au scroll */
+        .reveal { opacity: 0; transform: translateY(50px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* --- 6. SECTIONS SPÉCIFIQUES --- */
+        
+        /* HERO */
+        #home { align-items: flex-start; }
+
+        /* ABOUT / SKILLS */
+        .about-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center;
+        }
+        .skills-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        .skill-pill {
+            padding: 8px 20px; background: rgba(255,255,255,0.5); border: 1px solid white;
+            border-radius: 20px; font-size: 0.9rem; font-weight: 600; color: #555;
+            backdrop-filter: blur(5px);
+        }
+
+        /* PROJECTS */
+        .project-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;
+        }
+        .card {
+            background: var(--glass-bg); backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border); border-radius: 30px; padding: 40px;
+            transition: transform 0.1s; transform-style: preserve-3d;
+            box-shadow: var(--glass-shadow);
+        }
+        .card h3 { font-size: 1.5rem; margin: 15px 0 10px; }
+        .card-icon { font-size: 2.5rem; }
+        .card-link {
+            display: inline-block; margin-top: 20px; font-size: 0.9rem; font-weight: 700;
+            color: #0072FF; text-decoration: none;
+        }
+
+        /* CONTACT */
+        .contact-container {
+            max-width: 600px; margin: 0 auto; width: 100%;
+            background: var(--glass-bg); backdrop-filter: blur(25px);
+            padding: 50px; border-radius: 40px; border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+        form { display: flex; flex-direction: column; gap: 20px; margin-top: 30px; }
+        input, textarea {
+            background: rgba(255,255,255,0.5); border: none; padding: 15px 20px;
+            border-radius: 15px; font-family: 'Inter', sans-serif; font-size: 1rem;
+            outline: none; transition: 0.3s;
+        }
+        input:focus, textarea:focus { background: white; box-shadow: 0 0 0 2px rgba(0,114,255,0.2); }
+        textarea { resize: vertical; min-height: 120px; }
+
+        /* FOOTER */
+        footer { padding: 50px; text-align: center; color: var(--text-muted); font-size: 0.9rem; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; }
+            .about-grid { grid-template-columns: 1fr; }
+            nav { width: 95%; padding: 15px 20px; }
+            .nav-links { display: none; } /* Pour simplifier sur mobile */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader"><div class="spinner"></div></div>
+
+    <div class="liquid-container">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="blob b3"></div>
+    </div>
+
+    <nav>
+        <div class="logo">Portfolio.</div>
+        <div class="nav-links">
+            <a href="#home">Accueil</a>
+            <a href="#about">À propos</a>
+            <a href="#work">Projets</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <section id="home">
+        <div class="reveal">
+            <h1>Créativité <br><span class="gradient-text">Sans Limites.</span></h1>
+            <p>Concepteur d'interfaces numériques & Développeur Front-End. <br>Je transforme des idées complexes en expériences fluides.</p>
+            <a href="#work" class="btn">Voir mes réalisations</a>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="about-grid">
+            <div class="reveal">
+                <h2>L'art du détail</h2>
+                <p>Passionné par l'intersection entre le design et la technologie. Je ne me contente pas de coder, je crée des écosystèmes visuels qui respirent.</p>
+                <div class="skills-container">
+                    <span class="skill-pill">UI Design</span>
+                    <span class="skill-pill">HTML5 / CSS3</span>
+                    <span class="skill-pill">JavaScript (ES6+)</span>
+                    <span class="skill-pill">React.js</span>
+                    <span class="skill-pill">Three.js</span>
+                    <span class="skill-pill">Motion</span>
+                </div>
+            </div>
+            <div class="card js-tilt reveal" style="height: 300px; display:flex; align-items:center; justify-content:center;">
+                <div style="text-align:center;">
+                    <div style="font-size:4rem;">🎨</div>
+                    <h3>Design & Code</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="work">
+        <h2 class="reveal">Projets Sélectionnés</h2>
+        <div class="project-grid">
+            <div class="card js-tilt reveal">
+                <div style="transform: translateZ(30px);">
+                    <div class="card-icon">📱</div>
+                    <h3>App Finance</h3>
+                    <p>Interface bancaire minimaliste repensée pour la génération Z.</p>
+                    <a href="#" class="card-link">Voir l'étude de cas →</a>
+                </div>
+            </div>
+            <div class="card js-tilt reveal">
+                <div style="transform: translateZ(30px);">
+                    <div class="card-icon">✨</div>
+                    <h3>Neo Agency</h3>
+                    <p>Site vitrine immersif avec animations WebGL et scroll fluide.</p>
+                    <a href="#" class="card-link">Visiter le site →</a>
+                </div>
+            </div>
+            <div class="card js-tilt reveal">
+                <div style="transform: translateZ(30px);">
+                    <div class="card-icon">🛍️</div>
+                    <h3>E-Shop Glass</h3>
+                    <p>Expérience e-commerce utilisant le glassmorphism à grande échelle.</p>
+                    <a href="#" class="card-link">Voir le prototype →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="contact-container reveal">
+            <h2>Parlons de votre projet</h2>
+            <p style="margin: 0 auto;">Une idée en tête ? Créons quelque chose d'unique ensemble.</p>
+            <form>
+                <input type="text" placeholder="Votre Nom">
+                <input type="email" placeholder="Votre Email">
+                <textarea placeholder="Votre Message"></textarea>
+                <button type="submit" class="btn" style="width:100%; border:none; cursor:pointer;">Envoyer</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2024 Design & Code. Fait avec passion.</p>
+    </footer>
+
+    <script>
+        // 1. LOADER DISPARITION
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.visibility = 'hidden';
+            }, 500);
+        });
+
+        // 2. SCROLL REVEAL (Apparition des éléments)
+        const revealElements = document.querySelectorAll('.reveal');
+        
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        // 3. TILT EFFECT 3D (Effet sur les cartes)
+        const cards = document.querySelectorAll('.js-tilt');
+
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                // Calcul angles rotation
+                const xRotation = -1 * ((y - rect.height / 2) / 20); 
+                const yRotation = (x - rect.width / 2) / 20;
+                
+                card.style.transform = `perspective(1000px) rotateX(${xRotation}deg) rotateY(${yRotation}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+            });
+        });
+    </script>
+</body>
+</html>
